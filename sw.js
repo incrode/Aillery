@@ -1,30 +1,33 @@
 const cacheName = "cache-v1";
+const currentPath = location.href.slice(0,location.href.lastIndexOf("/"));
+
 const res = [
-	"/",
-	"/index.html",
-	"/image.html",
-	"/folder.html",
-	"/capture.html",
-	"/media/app/img/logo.png",
-	"/manifest.json",
-	"/css/Init.css",
-	"/css/index.css",
-	"/css/image.css",
-	"/css/folder.css",
-	"/css/capture.css",
-	"/js/index.js",
-	"/js/image.js",
-	"/js/capture.js",
-	"/js/folder.js",
-	"/js/Settings.js",
-	"/js/APIs/Camera.js",
-	"/js/APIs/Storage.js",
-	"/UI/css/Loader.css",
-	"/UI/css/OptionBox.css",
-	"/UI/js/Loader.js",
-	"/UI/js/OptionBox.js"
+	currentPath + "/",
+	currentPath + "/index.html",
+	currentPath + "/image.html",
+	currentPath + "/folder.html",
+	currentPath + "/capture.html",
+	currentPath + "/media/app/img/logo.png",
+	currentPath + "/manifest.json",
+	currentPath + "/css/Init.css",
+	currentPath + "/css/index.css",
+	currentPath + "/css/image.css",
+	currentPath + "/css/folder.css",
+	currentPath + "/css/capture.css",
+	currentPath + "/js/index.js",
+	currentPath + "/js/image.js",
+	currentPath + "/js/capture.js",
+	currentPath + "/js/folder.js",
+	currentPath + "/js/Settings.js",
+	currentPath + "/js/APIs/Camera.js",
+	currentPath + "/js/APIs/Storage.js",
+	currentPath + "/UI/css/Loader.css",
+	currentPath + "/UI/css/OptionBox.css",
+	currentPath + "/UI/js/Loader.js",
+	currentPath + "/UI/js/OptionBox.js"
 ];
 
+// event on sw-install
 self.addEventListener("install", ev => {
 	ev.waitUntil(caches.open(cacheName).then((cache)=>{
 		cache.addAll(res);
@@ -32,15 +35,34 @@ self.addEventListener("install", ev => {
 });
 
 
-const cacheFirst = async (request) =>{
-	const response = await caches.match(request);
-	if (response) {
-		return response;
+// putInCache
+async function putInCache(request, response) 
+{
+  const cache = await caches.open(cacheName);
+  await cache.put(request, response);
+};
+
+// cacheFirst
+async function cacheFirst(request, ev) {
+	const responseFromCache = await caches.match(request);
+	if (responseFromCache && !responseFromCache.redirected) {
+		return responseFromCache;
 	}
 
-	return fetch(request);
-}
-self.addEventListener("fetch", (ev) => {
-	console.log(ev.request);
-	ev.respondWith(cacheFirst(ev.request));
+	const responseFromNetwork = await fetch(request, {
+		method: "GET",
+		redirect: "manual"
+	});
+
+	if (!responseFromNetwork) {
+		return responseFromNetwork;
+	}
+
+	ev.waitUntil(putInCache(request, responseFromNetwork.clone()));
+	return responseFromNetwork;
+};
+
+// event on sw-fetch
+self.addEventListener("fetch", async (ev) => {
+	ev.respondWith(cacheFirst(ev.request, ev));
 });

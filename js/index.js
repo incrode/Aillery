@@ -73,8 +73,12 @@ const App = {
 
 		if ("serviceWorker" in navigator)
 		{
-			navigator.serviceWorker.register("/sw.js",{
-				scope:"/"
+			navigator.serviceWorker.register(location.href.slice(0, location.href.lastIndexOf("/")) + "/sw.js",{
+				scope: location.href
+			}).then(()=>{
+				console.log("Loaded service worker successfully!");
+			}).catch((error)=>{
+				console.log("Failed to load service worker: ", error);
 			});
 		}
 

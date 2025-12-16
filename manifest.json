@@ -1,13 +1,13 @@
 {
 	"name":"Aillery",
 	"short_name":"Aillery",
-	"start_url":"/",
+	"start_url":"./",
 	"display":"standalone",
 	"background_color":"#bbb",
 	"theme_color":"#bbb",
 	"icons": [
 		{
-			"src":"/media/app/img/logo.png",
+			"src":"./media/app/img/logo.png",
 			"sizes":"512x512",
 			"type":"image/png"
 		}
